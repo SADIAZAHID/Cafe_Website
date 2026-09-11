@@ -1,0 +1,27 @@
+{
+    "name":  "cafe_website_project",
+    "version":  "1.0.0",
+    "description":  "",
+    "main":  "index.js",
+    "scripts":  {
+                    "preview":  "vite preview",
+                    "build":  "vite build",
+                    "dev":  "vite"
+                },
+    "keywords":  [
+
+                 ],
+    "author":  "",
+    "license":  "ISC",
+    "type":  "commonjs",
+    "dependencies":  {
+                         "canvas-confetti":  "^1.9.4",
+                         "lucide-react":  "^1.41.0",
+                         "react":  "^19.2.8",
+                         "react-dom":  "^19.2.8"
+                     },
+    "devDependencies":  {
+                            "@vitejs/plugin-react":  "^6.1.1",
+                            "vite":  "^8.2.2"
+                        }
+}
