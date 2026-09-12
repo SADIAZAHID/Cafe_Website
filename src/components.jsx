@@ -45,8 +45,19 @@ export function Navbar({ darkMode, toggleDark, cartCount, onOpenCart }) {
   ]
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', onScroll)
+    const sectionIds = ['home', 'about', 'menu', 'gallery', 'reviews', 'contact']
+    const onScroll = () => {
+      setScrolled(window.scrollY > 50)
+      const scrollPos = window.scrollY + 200
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const sec = document.getElementById(sectionIds[i])
+        if (sec && sec.offsetTop <= scrollPos) {
+          setActive(sectionIds[i])
+          break
+        }
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
@@ -321,7 +332,7 @@ const menuData = {
       desc: 'Steeped for 20 hours for ultra-smooth, low-acidity dark chocolate and hazelnut notes.',
       price: '$5.75',
       badge: 'Summer Hit',
-      img: 'https://www.pinterest.com/pin/5911043262906457/',
+      img: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=800&q=80&fit=crop',
     },
     {
       name: 'Vanilla Bean Cappuccino',
@@ -749,6 +760,7 @@ export function Contact() {
   })
   const [errors, setErrors] = useState({})
   const [submitted, setSubmitted] = useState(false)
+  const [confirmCode, setConfirmCode] = useState('')
 
   const validate = () => {
     const e = {}
@@ -770,6 +782,7 @@ export function Contact() {
       setErrors(errs)
       return
     }
+    setConfirmCode('ARM-' + Math.floor(10000 + Math.random() * 90000))
     setSubmitted(true)
   }
 
@@ -859,7 +872,7 @@ export function Contact() {
                   Thank you, <strong>{form.name}</strong>! We have confirmed your reservation for <strong>{form.guests} guests</strong> on <strong>{form.date}</strong> at <strong>{form.time}</strong>.
                 </p>
                 <div className="res-confirmation-code">
-                  Confirmation Code: <span>#ARM-{(Math.random() * 89999 + 10000).toFixed(0)}</span>
+                  Confirmation Code: <span>#{confirmCode}</span>
                 </div>
                 <button
                   className="btn-primary mt-4"
@@ -1152,14 +1165,23 @@ export function CheckoutModal({
   const [customer, setCustomer] = useState({ name: '', phone: '', address: '', notes: '' })
   const [placed, setPlaced] = useState(false)
   const [error, setError] = useState('')
+  const [orderNum, setOrderNum] = useState('')
+  const [finalTotal, setFinalTotal] = useState(0)
 
   // Lock background scroll while checkout is open
   useEffect(() => {
     document.body.classList.toggle('no-scroll', isOpen)
+    if (isOpen) {
+      setPlaced(false)
+      setError('')
+    }
     return () => document.body.classList.remove('no-scroll')
   }, [isOpen])
 
   if (!isOpen) return null
+
+  const tax = subtotal * 0.08
+  const grandTotal = subtotal + tax
 
   const handlePlaceOrder = (e) => {
     e.preventDefault()
@@ -1167,12 +1189,11 @@ export function CheckoutModal({
       setError('Please provide your Name and Phone number.')
       return
     }
+    setFinalTotal(grandTotal)
+    setOrderNum('ARM-ORD-' + Math.floor(10000 + Math.random() * 90000))
     setPlaced(true)
     onOrderSuccess()
   }
-
-  const tax = subtotal * 0.08
-  const grandTotal = subtotal + tax
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -1189,8 +1210,8 @@ export function CheckoutModal({
               Thank you, <strong>{customer.name}</strong>! Your order is being freshly prepared by our baristas and chefs.
             </p>
             <div className="order-details-box">
-              <p>Order #: <span>ARM-ORD-{(Math.random() * 89999 + 10000).toFixed(0)}</span></p>
-              <p>Total Paid: <span>${grandTotal.toFixed(2)}</span></p>
+              <p>Order #: <span>{orderNum}</span></p>
+              <p>Total Paid: <span>${finalTotal.toFixed(2)}</span></p>
               <p>Estimated Prep Time: <span>15–20 Mins</span></p>
             </div>
             <button className="btn-primary mt-4" onClick={onClose}>
@@ -1401,9 +1422,24 @@ export function useScrollReveal() {
         entries.forEach((e) => {
           if (e.isIntersecting) e.target.classList.add('visible')
         }),
-      { threshold: 0.12 }
+      { threshold: 0.08 }
     )
-    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
+
+    const observeElements = () => {
+      document.querySelectorAll('.reveal:not(.visible)').forEach((el) => observer.observe(el))
+    }
+
+    observeElements()
+
+    const mutationObserver = new MutationObserver(() => {
+      observeElements()
+    })
+
+    mutationObserver.observe(document.body, { childList: true, subtree: true })
+
+    return () => {
+      observer.disconnect()
+      mutationObserver.disconnect()
+    }
   }, [])
 }

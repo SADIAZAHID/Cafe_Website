@@ -1463,9 +1463,16 @@ body.light-mode .hero-bg::after {
 body.light-mode .hero-title,
 body.light-mode .hero-badge,
 body.light-mode .hero-desc { color: inherit; }
+body.light-mode .nav-link { color: #3a1907; }
+body.light-mode .nav-link:hover, body.light-mode .nav-link.active { color: #c8640a; }
 body.light-mode .cart-drawer,
-body.light-mode .modal-content {
+body.light-mode .modal-content,
+body.light-mode .contact-form-wrapper {
   background: #fdfaf6;
+  color: #220e04;
+}
+body.light-mode .res-confirmation-code {
+  background: #f5e9d4;
   color: #220e04;
 }
 

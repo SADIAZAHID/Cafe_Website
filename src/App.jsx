@@ -26,6 +26,18 @@ export default function App() {
     document.body.classList.toggle('light-mode', !darkMode)
   }, [darkMode])
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsCartOpen(false)
+        setIsCheckoutOpen(false)
+        setLightboxImg(null)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   useScrollReveal()
 
   const addToCart = (item) => {
@@ -60,7 +72,7 @@ export default function App() {
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
   const cartSubtotal = cart.reduce((sum, item) => {
-    const priceNum = parseFloat(item.price.replace('$', '')) || 0
+    const priceNum = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0
     return sum + priceNum * item.quantity
   }, 0)
 
